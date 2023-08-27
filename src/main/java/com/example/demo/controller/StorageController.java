@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // This allows requests from the React app running on localhost:3000
+@CrossOrigin(origins = {"http://localhost:3000", "https://a-lions-roar.onrender.com"}) // This allows requests from the React app running on localhost:3000
 @RequestMapping("/file")
 @Slf4j
 
