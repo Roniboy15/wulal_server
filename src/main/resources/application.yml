@@ -1,16 +1,16 @@
 cloud:
   aws:
     credentials:
-      access-key: ${AWS_ACCESS_KEY:123}
-      secret-key: ${AWS_SECRET_KEY:123}
+      access-key: AWS_ACCESS_KEY
+      secret-key: AWS_SECRET_KEY
     region:
-      static: ${AWS_REGION:eu-north-1}
+      static: eu-north-1
     stack:
       auto: false
 
 application:
   bucket:
-    name: ${AWS_BUCKET_NAME:wulal}
+    name: AWS_BUCKET_NAME
 
 server:
   port: ${PORT:8000}
