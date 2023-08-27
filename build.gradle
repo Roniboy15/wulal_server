@@ -1,0 +1,36 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.1.2'
+	id 'io.spring.dependency-management' version '1.1.2'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
+	implementation 'io.awspring.cloud:spring-cloud-aws-messaging:2.3.1'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+	implementation 'software.amazon.awssdk:s3:2.20.131'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok:1.18.20' // Use the latest version
+	annotationProcessor 'org.projectlombok:lombok:1.18.20' // Use the latest version
+	implementation 'org.json:json:20210307'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
