@@ -19,8 +19,7 @@ import java.util.List;
 @Slf4j
 public class StorageService {
 
-    @Value("${application.bucket.name}")
-    private String bucketName;
+    private String bucketName = "wulal";
 
     @Autowired
     private AmazonS3 s3Client;

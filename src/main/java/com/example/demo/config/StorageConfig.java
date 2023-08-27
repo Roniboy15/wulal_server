@@ -15,13 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 public class StorageConfig {
 
-    @Value("${cloud.aws.credentials.access-key}")
-    private String accessKey;
-
-    @Value("${cloud.aws.credentials.secret-key}")
-    private String accessSecret;
-    @Value("${cloud.aws.region.static}")
-    private String region;
+    private String accessKey = System.getenv("AWS_ACCESS_KEY");
+    private String accessSecret = System.getenv("AWS_SECRET_KEY");
+    private String region = "eu-north-1";
 
     @Bean
     public AmazonS3 s3Client() {
