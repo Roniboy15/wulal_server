@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 public class StorageConfig {
 
@@ -22,6 +25,9 @@ public class StorageConfig {
 
     @Bean
     public AmazonS3 s3Client() {
+        log.info("Access Key: {}", accessKey);  // log the values
+        log.info("Secret Key: {}", accessSecret);
+        log.info("Region: {}", region);
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, accessSecret);
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
