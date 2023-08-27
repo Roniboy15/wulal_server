@@ -4,7 +4,7 @@ cloud:
       access-key: ${AWS_ACCESS_KEY:123}
       secret-key: ${AWS_SECRET_KEY:123}
     region:
-      static: eu-north-1
+      static: ${AWS_REGION:eu-north-1}
     stack:
       auto: false
 
@@ -13,4 +13,4 @@ application:
     name: ${AWS_BUCKET_NAME:wulal}
 
 server:
-  port: 8000
+  port: ${PORT:8000}
