@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.1.2'
+	id 'org.springframework.boot' version '2.5.4'
 	id 'io.spring.dependency-management' version '1.1.2'
 }
 
@@ -8,7 +8,10 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
+	//sourceCompatibility = '17'
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
+
 }
 
 repositories {
@@ -26,7 +29,6 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.20' // Use the latest version
 	annotationProcessor 'org.projectlombok:lombok:1.18.20' // Use the latest version
 	implementation 'org.json:json:20210307'
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
 
 
 }
