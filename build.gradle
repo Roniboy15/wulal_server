@@ -33,6 +33,10 @@ dependencies {
 
 }
 
+bootJar {
+	mainClassName = 'com.example.demo.FileStorageServiceApplication'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
