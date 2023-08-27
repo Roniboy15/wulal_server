@@ -28,8 +28,8 @@ dependencies {
 	implementation 'org.json:json:20210307'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
 
-
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
