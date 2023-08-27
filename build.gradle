@@ -37,6 +37,20 @@ bootJar {
 	mainClassName = 'com.example.demo.FileStorageServiceApplication'
 }
 
+jar {
+	manifest {
+		attributes(
+				'Main-Class': 'com.example.demo.FileStorageServiceApplication'
+		)
+	}
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
