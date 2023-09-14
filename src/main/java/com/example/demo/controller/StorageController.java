@@ -28,46 +28,57 @@ import java.util.List;
 @Slf4j
 
 public class StorageController {
+    private final Bucket bucket;
 
+    public StorageController() {
+        Bandwidth limit = Bandwidth.classic(20, Refill.greedy(20, Duration.ofMinutes(1)));
+        this.bucket = Bucket.builder()
+                .addLimit(limit)
+                .build();
+    }
     @Autowired
     private StorageService service;
 
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam(value = "file") MultipartFile file) {
-        return new ResponseEntity<>(service.uploadFile(file), HttpStatus.OK);
-    }
+//    @PostMapping("/upload")
+//    public ResponseEntity<String> uploadFile(@RequestParam(value = "file") MultipartFile file) {
+//        return new ResponseEntity<>(service.uploadFile(file), HttpStatus.OK);
+//    }
 
-    @GetMapping("/download/{fileName:.+}")
-    public ResponseEntity<String> downloadFile(@PathVariable String fileName,
-                                               @RequestParam(required = false) String folder) {
-        try {
-            String filePath;
-            if (folder != null && !folder.isEmpty()) {
-                filePath = folder + "/" + fileName;
-            } else {
-                filePath = fileName;
-            }
-            byte[] data = service.downloadFile(filePath);
-            String jsonData = new String(data, StandardCharsets.UTF_8);
-
-            return ResponseEntity
-                    .ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("Content-type", "application/json")
-                    .body(jsonData);
-        } catch (RuntimeException e) {
-            log.error("Error while fetching the file", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"error\": \"Failed to fetch the file\"}");
-        }
-    }
+//    @GetMapping("/download/{fileName:.+}")
+//    public ResponseEntity<String> downloadFile(@PathVariable String fileName,
+//                                               @RequestParam(required = false) String folder) {
+//        try {
+//            String filePath;
+//            if (folder != null && !folder.isEmpty()) {
+//                filePath = folder + "/" + fileName;
+//            } else {
+//                filePath = fileName;
+//            }
+//            byte[] data = service.downloadFile(filePath);
+//            String jsonData = new String(data, StandardCharsets.UTF_8);
+//
+//            return ResponseEntity
+//                    .ok()
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .header("Content-type", "application/json")
+//                    .body(jsonData);
+//        } catch (RuntimeException e) {
+//            log.error("Error while fetching the file", e);
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("{\"error\": \"Failed to fetch the file\"}");
+//        }
+//    }
 
 
     @GetMapping("/fetch")
     public ResponseEntity<String> fetchFilesFromFolder(@RequestParam(required = true) String folder) {
+        if (!bucket.tryConsume(1)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("{\"error\": \"Too many requests\"}");
+        }
+
         try {
             List<String> fileNames = service.listFilesInFolder(folder);
-
             JSONArray jsonArray = new JSONArray();
 
             for (String fileName : fileNames) {
@@ -90,8 +101,8 @@ public class StorageController {
 
 
 
-    @DeleteMapping("/delete/{fileName}")
-    public ResponseEntity<String> deleteFile(@PathVariable String fileName) {
-        return new ResponseEntity<>(service.deleteFile(fileName), HttpStatus.OK);
-    }
+//    @DeleteMapping("/delete/{fileName}")
+//    public ResponseEntity<String> deleteFile(@PathVariable String fileName) {
+//        return new ResponseEntity<>(service.deleteFile(fileName), HttpStatus.OK);
+//    }
 }
