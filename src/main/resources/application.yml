@@ -1,1 +1,17 @@
+cloud:
+  aws:
+    credentials:
+      access-key: AKIA2JIKBRJLWWKYPWEH
+      secret-key: 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
+    region:
+      static: eu-north-1
+    stack:
+      auto: false
+
+application:
+  bucket:
+    name: wulal
+
+server:
+  port: 8000
 
