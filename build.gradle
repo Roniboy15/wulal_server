@@ -27,6 +27,8 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.20' // Use the latest version
 	annotationProcessor 'org.projectlombok:lombok:1.18.20' // Use the latest version
 	implementation 'org.json:json:20210307'
+		implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+
 	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
 
 
