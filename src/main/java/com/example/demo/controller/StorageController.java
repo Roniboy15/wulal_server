@@ -6,6 +6,7 @@ import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 
@@ -72,28 +74,40 @@ public class StorageController {
 
     @GetMapping("/fetch")
     public ResponseEntity<String> fetchFilesFromFolder(@RequestParam(required = true) String folder) {
+
+        String currentFile = ""; // This will hold the name of the file currently being processed
+
         if (!bucket.tryConsume(1)) {
+            log.warn("Too many requests. Rejecting request for folder: {}", folder);
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body("{\"error\": \"Too many requests\"}");
         }
 
         try {
             List<String> fileNames = service.listFilesInFolder(folder);
-            JSONArray jsonArray = new JSONArray();
 
+            JSONArray jsonArray = new JSONArray();
             for (String fileName : fileNames) {
+                currentFile = fileName; // Update the currentFile variable
                 byte[] data = service.downloadFile(fileName);
-                JSONObject jsonFileContent = new JSONObject(new String(data, StandardCharsets.UTF_8));
-                jsonArray.put(jsonFileContent);
+                String fileContent = new String(data, StandardCharsets.UTF_8);
+                try {
+                    JSONObject jsonFileContent = new JSONObject(fileContent);
+                    jsonArray.put(jsonFileContent);
+                } catch (JSONException je) {
+                    log.warn("Invalid JSON content in file: {}. Skipping this file.", fileName);
+                }
             }
 
+            log.info("Successfully fetched files from folder: {}", folder);
             return ResponseEntity
                     .ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Content-type", "application/json")
                     .body(jsonArray.toString());
         } catch (RuntimeException e) {
-            log.error("Error while fetching the files", e);
+            String fileName = Paths.get(currentFile).getFileName().toString();
+            log.error("Error processing file '{}'. Details: {}", fileName, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"Failed to fetch the files\"}");
         }
