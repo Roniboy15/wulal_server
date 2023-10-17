@@ -22,4 +22,4 @@ smtp:
 
 logging:
   level:
-    root: DEBUG
+    root: 
