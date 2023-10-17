@@ -1,0 +1,25 @@
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: eu-north-1
+    stack:
+      auto: false
+
+application:
+  bucket:
+    name: ${AWS_BUCKET_NAME}
+
+server:
+  port: ${PORT:8000}
+
+smtp:
+  host: ${SMTP_HOST}
+  password: ${SMTP_PASS}
+  username: ${SMTP_USER}
+
+logging:
+  level:
+    root: DEBUG
