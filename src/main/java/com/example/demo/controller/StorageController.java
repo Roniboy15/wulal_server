@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -28,8 +27,8 @@ import java.util.List;
 @CrossOrigin(origins = {"http://localhost:3000", "https://a-lions-roar.onrender.com"}) // This allows requests from the React app running on localhost:3000
 @RequestMapping("/file")
 @Slf4j
-
 public class StorageController {
+
     private final Bucket bucket;
 
     public StorageController() {
@@ -46,30 +45,35 @@ public class StorageController {
 //        return new ResponseEntity<>(service.uploadFile(file), HttpStatus.OK);
 //    }
 
-//    @GetMapping("/download/{fileName:.+}")
-//    public ResponseEntity<String> downloadFile(@PathVariable String fileName,
-//                                               @RequestParam(required = false) String folder) {
-//        try {
-//            String filePath;
-//            if (folder != null && !folder.isEmpty()) {
-//                filePath = folder + "/" + fileName;
-//            } else {
-//                filePath = fileName;
-//            }
-//            byte[] data = service.downloadFile(filePath);
-//            String jsonData = new String(data, StandardCharsets.UTF_8);
-//
-//            return ResponseEntity
-//                    .ok()
-//                    .contentType(MediaType.APPLICATION_JSON)
-//                    .header("Content-type", "application/json")
-//                    .body(jsonData);
-//        } catch (RuntimeException e) {
-//            log.error("Error while fetching the file", e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("{\"error\": \"Failed to fetch the file\"}");
-//        }
-//    }
+    @GetMapping("/download/{fileName:.+}")
+    public ResponseEntity<String> downloadFile(@PathVariable String fileName,
+                                               @RequestParam(required = false) String folder) {
+        if (!bucket.tryConsume(1)) {
+            log.warn("Too many requests. Rejecting request for folder: {}", folder);
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("{\"error\": \"Too many requests\"}");
+        }
+        try {
+            String filePath;
+            if (folder != null && !folder.isEmpty()) {
+                filePath = folder + "/" + fileName;
+            } else {
+                filePath = fileName;
+            }
+            byte[] data = service.downloadFile(filePath);
+            String jsonData = new String(data, StandardCharsets.UTF_8);
+
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Content-type", "application/json")
+                    .body(jsonData);
+        } catch (RuntimeException e) {
+            log.error("Error while fetching the file", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"Failed to fetch the file\"}");
+        }
+    }
 
 
     @GetMapping("/fetch")
@@ -111,6 +115,39 @@ public class StorageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"Failed to fetch the files\"}");
         }
+    }
+
+
+    @PostMapping("/addquote")
+    public ResponseEntity<String> submitQuoteForApproval(@RequestBody String quote) {
+
+        // Check if we can consume a token
+        if (!bucket.tryConsume(1)) {
+            log.warn("Too many requests. Rejecting request for adding a quote.");
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("{\"error\": \"Too many requests\"}");
+        }
+
+        try {
+            return new ResponseEntity<>(service.submitQuoteForApproval(quote), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Error while adding the quote", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"Failed to add the quote\"}");
+        }
+    }
+
+
+    @RequestMapping("/approve")
+    public ResponseEntity<String> approve(@RequestParam String token) {
+        String result = service.approveQuote(token);
+        return ResponseEntity.ok(result);
+    }
+
+    @RequestMapping("/reject")
+    public ResponseEntity<String> reject(@RequestParam String token) {
+        String result = service.rejectQuote(token);
+        return ResponseEntity.ok(result);
     }
 
 
