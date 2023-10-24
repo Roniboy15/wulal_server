@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
@@ -119,7 +118,7 @@ public class StorageController {
 
 
     @PostMapping("/addquote")
-    public ResponseEntity<String> submitQuoteForApproval(@RequestBody String quote) {
+    public ResponseEntity<String> submitQuoteForApproval(@RequestBody QuoteRequest request) {
 
         // Check if we can consume a token
         if (!bucket.tryConsume(1)) {
@@ -129,7 +128,7 @@ public class StorageController {
         }
 
         try {
-            return new ResponseEntity<>(service.submitQuoteForApproval(quote), HttpStatus.OK);
+            return new ResponseEntity<>(service.submitQuoteForApproval(request.getQuote(), request.getMail()), HttpStatus.OK);
         } catch (RuntimeException e) {
             log.error("Error while adding the quote", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

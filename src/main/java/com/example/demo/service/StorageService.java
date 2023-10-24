@@ -35,12 +35,10 @@ public class StorageService {
     @Value("${smtp.password}")
     private String getSmtpPass;
 
-
     @Autowired
     private AmazonS3 s3Client;
 
     private Map<String, String> pendingQuotes = new HashMap<>();
-
 
     public String uploadFile(MultipartFile file) {
         File fileObj = convertMultiPartFileToFile(file);
@@ -49,7 +47,6 @@ public class StorageService {
         fileObj.delete();
         return "File uploaded : " + fileName;
     }
-
 
     public byte[] downloadFile(String fileName) {
         S3Object s3Object = s3Client.getObject(bucketName, fileName);
@@ -62,67 +59,65 @@ public class StorageService {
         }
         return null;
     }
-//
-//    public String addQuote(String quote) {
-//        String fileName = "quotes.json";
-//        try {
-//            // Fetch the JSON file from S3 bucket.
-//            byte[] content = downloadFile(fileName);
-//            JSONArray jsonArray;
-//            // Parse the content of the file.
-//            if (content != null && content.length > 0) {
-//                String existingContent = new String(content, StandardCharsets.UTF_8);
-//                jsonArray = new JSONArray(existingContent);
-//            } else {
-//                jsonArray = new JSONArray();
-//            }
-//            // Add the new quote.
-//            jsonArray.put(new JSONObject().put("quote", quote));
-//
-//            // Convert the updated JSON array to byte array.
-//            byte[] newContent = jsonArray.toString().getBytes(StandardCharsets.UTF_8);
-//
-//            // Upload the updated file back to S3 bucket.
-//            s3Client.putObject(new PutObjectRequest(bucketName, fileName, new ByteArrayInputStream(newContent), new ObjectMetadata()));
-//
-//            return "Quote added successfully";
-//        }  catch (AmazonS3Exception e) {
-//            // Log the detailed error message and request information
-//            System.err.println("Error accessing S3. Request ID: " + e.getRequestId() + " Error Code: " + e.getErrorCode());
-//            // Rethrow the exception to be handled by the calling method or global exception handler
-//            throw new RuntimeException("Error adding quote", e);
-//        }
-//    }
-//
-
+    //
+    // public String addQuote(String quote) {
+    // String fileName = "quotes.json";
+    // try {
+    // // Fetch the JSON file from S3 bucket.
+    // byte[] content = downloadFile(fileName);
+    // JSONArray jsonArray;
+    // // Parse the content of the file.
+    // if (content != null && content.length > 0) {
+    // String existingContent = new String(content, StandardCharsets.UTF_8);
+    // jsonArray = new JSONArray(existingContent);
+    // } else {
+    // jsonArray = new JSONArray();
+    // }
+    // // Add the new quote.
+    // jsonArray.put(new JSONObject().put("quote", quote));
+    //
+    // // Convert the updated JSON array to byte array.
+    // byte[] newContent = jsonArray.toString().getBytes(StandardCharsets.UTF_8);
+    //
+    // // Upload the updated file back to S3 bucket.
+    // s3Client.putObject(new PutObjectRequest(bucketName, fileName, new
+    // ByteArrayInputStream(newContent), new ObjectMetadata()));
+    //
+    // return "Quote added successfully";
+    // } catch (AmazonS3Exception e) {
+    // // Log the detailed error message and request information
+    // System.err.println("Error accessing S3. Request ID: " + e.getRequestId() + "
+    // Error Code: " + e.getErrorCode());
+    // // Rethrow the exception to be handled by the calling method or global
+    // exception handler
+    // throw new RuntimeException("Error adding quote", e);
+    // }
+    // }
+    //
 
     public String deleteFile(String fileName) {
         s3Client.deleteObject(bucketName, fileName);
         return fileName + " removed ...";
     }
 
-
-
-
     private String generateUniqueToken() {
         return UUID.randomUUID().toString();
     }
 
-
-    public String submitQuoteForApproval(String quote) {
+    public String submitQuoteForApproval(String quote, String mail) {
         try {
             // Step 1: Generate a unique token for this quote
             String token = generateUniqueToken();
 
-            // Optional: Save this token and the associated quote to a database or temporary storage
+            // Optional: Save this token and the associated quote to a database or temporary
+            // storage
             // so that when the email link is clicked, you can look up the associated quote.
 
             // Save this token and the associated quote in the pendingQuotes map
             pendingQuotes.put(token, quote);
 
             // Step 2: Send an email for approval with the token embedded in the links
-            sendEmailWithJavaMail(quote, token);
-
+            sendEmailWithJavaMail(quote, mail, token);
             return "Approval email sent successfully";
         } catch (Exception e) {
             System.err.println("Error submitting quote for approval: " + e.getMessage());
@@ -130,17 +125,14 @@ public class StorageService {
         }
     }
 
-
-
-
-    private void sendEmailWithJavaMail(String quote, String token) {
+    private void sendEmailWithJavaMail(String quote, String mail, String token) {
         final String smtpHost = getSmtpHost;
         final String fromEmail = "jaron.111@hotmail.com";
         final String smtpUsername = getSmtpUser;
         final String smtpPassword = getSmtpPass;
 
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", "true");  // Enable authentication
+        properties.put("mail.smtp.auth", "true"); // Enable authentication
         properties.put("mail.smtp.starttls.enable", "true");
         properties.put("mail.smtp.host", smtpHost);
         properties.put("mail.smtp.port", "587");
@@ -162,9 +154,10 @@ public class StorageService {
             String approveLink = "https://wulal-886ecc4c7ff3.herokuapp.com/file/approve?token=" + token;
             String rejectLink = "https://wulal-886ecc4c7ff3.herokuapp.com/file/reject?token=" + token;
 
-            String emailBody = "New Quote: " + quote + "\n\n" +
-                    "Approve: " + approveLink + "\n" +
-                    "Reject: " + rejectLink;
+            String emailBody = "New Quote: \n" + quote + "\n\n" +
+            "Approve: " + approveLink + "\n\n" +
+            "Reject: " + rejectLink + "\n\n\n" +
+            "Email: " + mail;
 
             message.setText(emailBody);
 
@@ -175,8 +168,6 @@ public class StorageService {
             throw new RuntimeException(e);
         }
     }
-
-
 
     public String approveQuote(String token) {
         if (pendingQuotes.containsKey(token)) {
@@ -193,7 +184,6 @@ public class StorageService {
         }
         return "Invalid token or already processed";
     }
-
 
     private String addQuoteToStorage(String quote) {
         String fileName = "quotes.json";
@@ -221,21 +211,19 @@ public class StorageService {
             jsonArray.put(newQuote);
 
             byte[] newContent = jsonArray.toString().getBytes(StandardCharsets.UTF_8);
-            s3Client.putObject(new PutObjectRequest(bucketName, fileName, new ByteArrayInputStream(newContent), new ObjectMetadata()));
+            s3Client.putObject(new PutObjectRequest(bucketName, fileName, new ByteArrayInputStream(newContent),
+                    new ObjectMetadata()));
 
             return "Quote added successfully";
         } catch (AmazonS3Exception e) {
-            System.err.println("Error accessing S3. Request ID: " + e.getRequestId() + " Error Code: " + e.getErrorCode());
+            System.err.println(
+                    "Error accessing S3. Request ID: " + e.getRequestId() + " Error Code: " + e.getErrorCode());
             throw new RuntimeException("Error adding quote", e);
         } catch (JSONException e) {
             System.err.println("Error processing JSON.");
             throw new RuntimeException("Error processing JSON", e);
         }
     }
-
-
-
-
 
     private File convertMultiPartFileToFile(MultipartFile file) {
         File convertedFile = new File(file.getOriginalFilename());
