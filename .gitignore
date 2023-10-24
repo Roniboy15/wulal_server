@@ -7,6 +7,7 @@ build/
 
 src/main/resources/application.yml
 src/main/resources/lulu.yml
+# src/main/java/com/example/demo/YamlPropertySourceFactory.java
 
 ### STS ###
 .apt_generated
