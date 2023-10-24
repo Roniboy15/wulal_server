@@ -109,7 +109,7 @@ public class StorageService {
     }
 
 
-    public String submitQuoteForApproval(String quote) {
+    public String submitQuoteForApproval(String quote, String mail) {
         try {
             // Step 1: Generate a unique token for this quote
             String token = generateUniqueToken();
@@ -121,7 +121,7 @@ public class StorageService {
             pendingQuotes.put(token, quote);
 
             // Step 2: Send an email for approval with the token embedded in the links
-            sendEmailWithJavaMail(quote, token);
+            sendEmailWithJavaMail(quote, mail, token);
 
             return "Approval email sent successfully";
         } catch (Exception e) {
@@ -133,7 +133,7 @@ public class StorageService {
 
 
 
-    private void sendEmailWithJavaMail(String quote, String token) {
+    private void sendEmailWithJavaMail(String quote, String mail, String token) {
         final String smtpHost = getSmtpHost;
         final String fromEmail = "jaron.111@hotmail.com";
         final String smtpUsername = getSmtpUser;
@@ -162,9 +162,10 @@ public class StorageService {
             String approveLink = "http://localhost:8000/file/approve?token=" + token;
             String rejectLink = "http://localhost:8000/file/reject?token=" + token;
 
-            String emailBody = "New Quote: " + quote + "\n\n" +
-                    "Approve: " + approveLink + "\n" +
-                    "Reject: " + rejectLink;
+            String emailBody = "New Quote: \n" + quote + "\n\n" +
+                    "Approve: " + approveLink + "\n\n" +
+                    "Reject: " + rejectLink + "\n\n\n" +
+                    "Email: " + mail;
 
             message.setText(emailBody);
 
